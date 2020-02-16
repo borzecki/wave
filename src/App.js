@@ -11,46 +11,33 @@ import Effects from './components/Effects';
 import { perlin3 } from './perlin';
 import './styles.css';
 
-function App() {
+const defaultGroup = [
+    { name: 'coefficient', value: 0.04, step: 0.01 },
+    { name: 'magnitude', value: 14, step: 1 },
+    { name: 'speed', value: 1, step: 1 },
+    { name: 'move', value: 2, step: 1 }
+];
+
+const App = () => {
     const [mouseDown, setMouseDown] = useState(false);
 
-    const [groups, setGroups] = useState([]);
+    const [groups, setGroups] = useState([defaultGroup]);
 
     const setValue = curry((groupIndex, name, value) => {
-        const controlIndex = findIndex(
-            propEq('name', name),
-            groups[groupIndex]
-        );
-        const updated = adjust(
-            groupIndex,
-            () =>
-                adjust(
-                    controlIndex,
-                    () =>
-                        assoc('value', value, groups[groupIndex][controlIndex]),
-                    groups[groupIndex]
-                ),
-            groups
-        );
+        const group = groups[groupIndex];
+        const controlIndex = findIndex(propEq('name', name), group);
+        const updateControl = () =>
+            adjust(
+                controlIndex,
+                () => assoc('value', value, group[controlIndex]),
+                group
+            );
+        const updated = adjust(groupIndex, updateControl, groups);
         setGroups(updated);
     });
 
-    const addControl = () =>
-        setGroups(
-            append(
-                [
-                    { name: 'coefficient', value: 0.04, step: 0.01 },
-                    { name: 'magnitude', value: 14, step: 1 },
-                    { name: 'speed', value: 1, step: 1 },
-                    { name: 'move', value: 2, step: 1 }
-                ],
-                groups
-            )
-        );
-
+    const addControl = () => setGroups(append(defaultGroup, groups));
     const removeControl = i => setGroups(remove(i, 1, groups));
-
-    useEffect(() => addControl(), []);
 
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -94,6 +81,6 @@ function App() {
             />
         </>
     );
-}
+};
 
 export default App;

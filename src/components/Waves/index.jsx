@@ -4,6 +4,10 @@ import { sum, map, fromPairs } from 'ramda';
 
 const Waves = ({ groups, noisefn, rotateMode, ...props }) => {
     const mesh = useRef();
+    const groupObjects = map(
+        group => fromPairs(map(({ name, value }) => [name, value], group)),
+        groups
+    );
     useFrame(state => {
         const time = state.clock.getElapsedTime();
 
@@ -15,10 +19,6 @@ const Waves = ({ groups, noisefn, rotateMode, ...props }) => {
             mesh.current.rotation.x = 0;
             mesh.current.rotation.y = 0;
         }
-        const groupObjects = map(
-            group => fromPairs(map(({ name, value }) => [name, value], group)),
-            groups
-        );
         for (var i = 0; i < mesh.current.geometry.vertices.length; i++) {
             const { x, y } = mesh.current.geometry.vertices[i];
             const groupValues = map(
