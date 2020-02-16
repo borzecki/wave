@@ -1,106 +1,15 @@
 import * as THREE from 'three';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import {
-    curry,
-    findIndex,
-    propEq,
-    adjust,
-    assoc,
-    sum,
-    map,
-    append,
-    fromPairs,
-    remove
-} from 'ramda';
+import { curry, findIndex, propEq, adjust, assoc, append, remove } from 'ramda';
+import { Canvas } from 'react-three-fiber';
 
-import { Canvas, useFrame } from 'react-three-fiber';
-import * as perlin from './perlin';
-import Effects from './Effects';
+import Control from './components/Control';
+import Waves from './components/Waves';
+import Effects from './components/Effects';
+
+import { perlin3 } from './perlin';
 import './styles.css';
-
-const Waves = ({ groups, noisefn, rotateMode, ...props }) => {
-    const mesh = useRef();
-    useFrame(state => {
-        const time = state.clock.getElapsedTime();
-
-        // on mouse down release the kraken
-        if (rotateMode) {
-            mesh.current.rotation.x = Math.sin(time / 4);
-            mesh.current.rotation.y = Math.sin(time / 2);
-        } else {
-            mesh.current.rotation.x = 0;
-            mesh.current.rotation.y = 0;
-        }
-        const groupObjects = map(
-            group => fromPairs(map(({ name, value }) => [name, value], group)),
-            groups
-        );
-        for (var i = 0; i < mesh.current.geometry.vertices.length; i++) {
-            const { x, y } = mesh.current.geometry.vertices[i];
-            const groupValues = map(
-                ({ coefficient, magnitude, speed, move }) =>
-                    noisefn(
-                        x * coefficient,
-                        y * coefficient + time * move,
-                        time * speed
-                    ) * magnitude,
-                groupObjects
-            );
-            mesh.current.geometry.vertices[i].z = sum(groupValues);
-        }
-        mesh.current.geometry.verticesNeedUpdate = true;
-    });
-    return (
-        <group {...props}>
-            <mesh ref={mesh}>
-                <planeGeometry attach="geometry" args={[100, 200, 200, 200]} />
-                <meshPhongMaterial attach="material" color="red" wireframe />
-            </mesh>
-        </group>
-    );
-};
-
-const NumberControlGroup = ({ name, value, setValue, step }) => (
-    <div className="control-group">
-        <label htmlFor={name}>{name}</label>
-        <input
-            name={name}
-            type="number"
-            value={value}
-            step={step}
-            onChange={event => setValue(event.target.value)}
-        />
-    </div>
-);
-
-const Control = ({ controlGroups, setValue, onRemove }) => (
-    <div className="controls">
-        {controlGroups.map((controls, i) => (
-            <ControlGroup
-                key={i}
-                onRemove={() => onRemove(i)}
-                setValue={setValue(i)}
-                controls={controls}
-            />
-        ))}
-    </div>
-);
-
-const ControlGroup = ({ controls, setValue, onRemove }) => (
-    <div className="control">
-        <div className="remove-control" onClick={onRemove}>
-            -
-        </div>
-        {controls.map(control => (
-            <NumberControlGroup
-                key={control.name}
-                setValue={setValue(control.name)}
-                {...control}
-            />
-        ))}
-    </div>
-);
 
 function App() {
     const [mouseDown, setMouseDown] = useState(false);
@@ -167,22 +76,20 @@ function App() {
                 }}
             >
                 <fog attach="fog" args={['black', 10, 200]} />
+                <ambientLight intensity={1} />
                 <Waves
                     rotateMode={mouseDown}
                     groups={groups}
-                    noisefn={perlin.perlin3}
+                    noisefn={perlin3}
                     position={[0, 0, -10]}
                     scale={[1.5, 1, 1]}
                 />
-                <ambientLight intensity={1} />
                 <Effects down={mouseDown} />
             </Canvas>
-            <div className="add-control" onClick={addControl}>
-                +
-            </div>
             <Control
                 controlGroups={groups}
                 setValue={setValue}
+                onAdd={addControl}
                 onRemove={removeControl}
             />
         </>
