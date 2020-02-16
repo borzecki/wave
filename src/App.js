@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import {
     curry,
@@ -10,19 +10,28 @@ import {
     sum,
     map,
     append,
-    fromPairs
+    fromPairs,
+    remove
 } from 'ramda';
+
 import { Canvas, useFrame } from 'react-three-fiber';
 import * as perlin from './perlin';
 import Effects from './Effects';
 import './styles.css';
 
-const Waves = ({ groups, noisefn, ...props }) => {
+const Waves = ({ groups, noisefn, rotateMode, ...props }) => {
     const mesh = useRef();
     useFrame(state => {
         const time = state.clock.getElapsedTime();
-        // mesh.current.rotation.x = Math.sin(time / 4);
-        // mesh.current.rotation.y = Math.sin(time / 2);
+
+        // on mouse down release the kraken
+        if (rotateMode) {
+            mesh.current.rotation.x = Math.sin(time / 4);
+            mesh.current.rotation.y = Math.sin(time / 2);
+        } else {
+            mesh.current.rotation.x = 0;
+            mesh.current.rotation.y = 0;
+        }
         const groupObjects = map(
             group => fromPairs(map(({ name, value }) => [name, value], group)),
             groups
@@ -65,16 +74,24 @@ const NumberControlGroup = ({ name, value, setValue, step }) => (
     </div>
 );
 
-const Control = ({ controlGroups, setValue }) => (
+const Control = ({ controlGroups, setValue, onRemove }) => (
     <div className="controls">
         {controlGroups.map((controls, i) => (
-            <ControlGroup key={i} setValue={setValue(i)} controls={controls} />
+            <ControlGroup
+                key={i}
+                onRemove={() => onRemove(i)}
+                setValue={setValue(i)}
+                controls={controls}
+            />
         ))}
     </div>
 );
 
-const ControlGroup = ({ controls, setValue }) => (
+const ControlGroup = ({ controls, setValue, onRemove }) => (
     <div className="control">
+        <div className="remove-control" onClick={onRemove}>
+            -
+        </div>
         {controls.map(control => (
             <NumberControlGroup
                 key={control.name}
@@ -86,16 +103,9 @@ const ControlGroup = ({ controls, setValue }) => (
 );
 
 function App() {
-    const [down, set] = useState(false);
+    const [mouseDown, setMouseDown] = useState(false);
 
-    const [groups, setGroups] = useState([
-        [
-            { name: 'coefficient', value: 0.08, step: 0.01 },
-            { name: 'magnitude', value: 18, step: 1 },
-            { name: 'speed', value: 0, step: 1 },
-            { name: 'move', value: 2, step: 1 }
-        ]
-    ]);
+    const [groups, setGroups] = useState([]);
 
     const setValue = curry((groupIndex, name, value) => {
         const controlIndex = findIndex(
@@ -115,28 +125,24 @@ function App() {
         );
         setGroups(updated);
     });
+
     const addControl = () =>
         setGroups(
             append(
                 [
-                    { name: 'coefficient', value: 0.08, step: 0.01 },
-                    { name: 'magnitude', value: 18, step: 1 },
-                    { name: 'speed', value: 0, step: 1 },
+                    { name: 'coefficient', value: 0.04, step: 0.01 },
+                    { name: 'magnitude', value: 14, step: 1 },
+                    { name: 'speed', value: 1, step: 1 },
                     { name: 'move', value: 2, step: 1 }
                 ],
                 groups
             )
         );
 
-    const mouse = useRef([0, 0]);
-    const onMouseMove = useCallback(
-        ({ clientX: x, clientY: y }) =>
-            (mouse.current = [
-                x - window.innerWidth / 2,
-                y - window.innerHeight / 2
-            ]),
-        []
-    );
+    const removeControl = i => setGroups(remove(i, 1, groups));
+
+    useEffect(() => addControl(), []);
+
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     return (
@@ -148,35 +154,37 @@ function App() {
                     rotation: [(60 * Math.PI) / 180, 0, 0],
                     position: [0, -80, 40]
                 }}
-                onMouseMove={onMouseMove}
-                onMouseUp={() => set(false)}
-                onMouseDown={() => set(true)}
+                onMouseUp={() => setMouseDown(false)}
+                onMouseDown={() => setMouseDown(true)}
                 gl={{
                     alpha: false,
                     antialias: true,
                     logarithmicDepthBuffer: true
                 }}
                 onCreated={({ gl }) => {
-                    gl.setClearColor('D0D0D0');
                     gl.toneMapping = THREE.ACESFilmicToneMapping;
                     gl.outputEncoding = THREE.sRGBEncoding;
                 }}
             >
                 <fog attach="fog" args={['black', 10, 200]} />
                 <Waves
+                    rotateMode={mouseDown}
                     groups={groups}
                     noisefn={perlin.perlin3}
                     position={[0, 0, -10]}
                     scale={[1.5, 1, 1]}
                 />
-
                 <ambientLight intensity={1} />
-                <Effects down={down} />
+                <Effects down={mouseDown} />
             </Canvas>
             <div className="add-control" onClick={addControl}>
                 +
             </div>
-            <Control controlGroups={groups} setValue={setValue} />
+            <Control
+                controlGroups={groups}
+                setValue={setValue}
+                onRemove={removeControl}
+            />
         </>
     );
 }

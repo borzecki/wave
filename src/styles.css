@@ -42,8 +42,9 @@ body,
 }
 
 .control {
-    display: inline;
-    padding: 20px;
+    display: block;
+    padding: 10px;
+    position: relative;
 }
 
 .control-group {
@@ -55,8 +56,8 @@ input {
     width: 70px;
     text-align: right;
     outline: 0;
-    font-size: 1rem;
-    color: #fff;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.2);
     padding: 2px 0;
     float: right;
     background: transparent;
@@ -66,14 +67,16 @@ input {
 input:focus {
     padding-bottom: 2px;
     font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
     border-width: 3px;
     border-color: #fff;
 }
 
 label {
-    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.8rem;
     font-weight: 700;
-    padding-right: 80px;
+    padding-right: 20px;
 }
 
 /* Chrome, Safari, Edge, Opera */
@@ -92,6 +95,34 @@ input[type='number'] {
     position: absolute;
     top: 10px;
     right: 10px;
+    font-size: 20px;
+    text-align: center;
+    height: 20px;
+    width: 20px;
+    color: #fff;
+    border-radius: 100%;
+    transition: 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.add-control:hover {
+    background-color: #d44949;
+}
+
+.remove-control {
+    position: absolute;
+    top: 16px;
+    right: -20px;
+    font-size: 20px;
+    text-align: center;
+    height: 20px;
+    width: 20px;
+    color: #fff;
+    border-radius: 100%;
+    transition: 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.remove-control:hover {
+    background-color: #d44949;
 }
 
 body {
