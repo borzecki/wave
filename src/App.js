@@ -1,12 +1,5 @@
 import * as THREE from 'three';
-import React, {
-    Suspense,
-    useState,
-    useCallback,
-    useEffect,
-    useRef,
-    useMemo
-} from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 import {
     curry,
@@ -19,17 +12,10 @@ import {
     append,
     fromPairs
 } from 'ramda';
-import { Canvas, useFrame, useThree } from 'react-three-fiber';
+import { Canvas, useFrame } from 'react-three-fiber';
 import * as perlin from './perlin';
-import lerp from 'lerp';
-import Text from './Text';
 import Effects from './Effects';
-import Sparks from './Sparks';
-import Particles from './Particles';
 import './styles.css';
-import replacePathSepForGlob from 'jest-util/build/replacePathSepForGlob';
-
-const transform = value => (value < 0.1 ? 0 : value);
 
 const Waves = ({ groups, noisefn, ...props }) => {
     const mesh = useRef();
@@ -53,12 +39,6 @@ const Waves = ({ groups, noisefn, ...props }) => {
                 groupObjects
             );
             mesh.current.geometry.vertices[i].z = sum(groupValues);
-            // mesh.current.geometry.vertices[i].z +=
-            //     perlin.simplex3(
-            //         x * 0.02,
-            //         y * 0.02 + time * move,
-            //         time * speed
-            //     ) * 10;
         }
         mesh.current.geometry.verticesNeedUpdate = true;
     });
@@ -166,11 +146,8 @@ function App() {
                 pixelRatio={Math.min(2, isMobile ? window.devicePixelRatio : 1)}
                 camera={{
                     rotation: [(60 * Math.PI) / 180, 0, 0],
-                    // fov: 100,
                     position: [0, -80, 40]
                 }}
-                // camera={{ fov: 140, position: [0, 0, 80] }}
-
                 onMouseMove={onMouseMove}
                 onMouseUp={() => set(false)}
                 onMouseDown={() => set(true)}
@@ -186,15 +163,6 @@ function App() {
                 }}
             >
                 <fog attach="fog" args={['black', 10, 200]} />
-                {/* <Waves
-                    coefficient={coefficient}
-                    move={move}
-                    speed={speed}
-                    magnitude={magnitude}
-                    noise={perlin.perlin3}
-                    position={[0, 0, 50]}
-                    scale={[1.5, 1, 1]}
-                /> */}
                 <Waves
                     groups={groups}
                     noisefn={perlin.perlin3}
@@ -203,11 +171,6 @@ function App() {
                 />
 
                 <ambientLight intensity={1} />
-                {/* <pointLight position={[-100, -100, -100]} intensity={5} castShadow={true} color="red" /> */}
-
-                {/* <pointLight distance={100} intensity={4} color="white" /> */}
-                {/* <Particles count={isMobile ? 5000 : 10000} mouse={mouse} /> */}
-                {/* <Sparks count={10} radius={30} mouse={mouse} colors={['#A2CCB6', '#FCEEB5', '#EE786E', '#e0feff', 'lightpink', 'lightblue']} /> */}
                 <Effects down={down} />
             </Canvas>
             <div className="add-control" onClick={addControl}>
