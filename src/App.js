@@ -1,43 +1,30 @@
 import * as THREE from 'three';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 
-import { curry, findIndex, propEq, adjust, assoc, append, remove } from 'ramda';
+import { curry } from 'ramda';
 import { Canvas } from 'react-three-fiber';
 
 import Control from './components/Control';
 import Waves from './components/Waves';
 import Effects from './components/Effects';
 
-import { perlin3 } from './perlin';
-import './styles.css';
+import reducer, { initial } from './reducer';
+import { simplex3 } from './perlin';
 
-const defaultGroup = [
-    { name: 'coefficient', value: 0.04, step: 0.01 },
-    { name: 'magnitude', value: 14, step: 1 },
-    { name: 'speed', value: 1, step: 1 },
-    { name: 'move', value: 2, step: 1 }
-];
+import './styles.css';
 
 const App = () => {
     const [mouseDown, setMouseDown] = useState(false);
 
-    const [groups, setGroups] = useState([defaultGroup]);
+    const [groups, dispatch] = useReducer(reducer, initial);
 
     const setValue = curry((groupIndex, name, value) => {
-        const group = groups[groupIndex];
-        const controlIndex = findIndex(propEq('name', name), group);
-        const updateControl = () =>
-            adjust(
-                controlIndex,
-                () => assoc('value', value, group[controlIndex]),
-                group
-            );
-        const updated = adjust(groupIndex, updateControl, groups);
-        setGroups(updated);
+        dispatch({ type: 'UPDATE_GROUP', groupIndex, name, value });
     });
 
-    const addControl = () => setGroups(append(defaultGroup, groups));
-    const removeControl = i => setGroups(remove(i, 1, groups));
+    const addControl = () => dispatch({ type: 'ADD_GROUP' });
+    const removeControl = i =>
+        dispatch({ type: 'REMOVE_GROUP', groupIndex: i });
 
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -67,7 +54,7 @@ const App = () => {
                 <Waves
                     rotateMode={mouseDown}
                     groups={groups}
-                    noisefn={perlin3}
+                    noisefn={simplex3}
                     position={[0, 0, -10]}
                     scale={[1.5, 1, 1]}
                 />
