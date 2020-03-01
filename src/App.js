@@ -9,7 +9,6 @@ import Waves from './components/Waves';
 import Effects from './components/Effects';
 
 import reducer, { initial } from './reducer';
-import { simplex3 } from './perlin';
 
 import './styles.css';
 
@@ -54,7 +53,6 @@ const App = () => {
                 <Waves
                     rotateMode={mouseDown}
                     groups={groups}
-                    noisefn={simplex3}
                     position={[0, 0, -10]}
                     scale={[1.5, 1, 1]}
                 />

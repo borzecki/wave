@@ -1,8 +1,11 @@
 import React, { useRef } from 'react';
 import { useFrame } from 'react-three-fiber';
 import { sum, map, fromPairs } from 'ramda';
+import { simplex3, perlin3 } from '../../perlin';
 
-const Waves = ({ groups, noisefn, rotateMode, ...props }) => {
+const getNoiseFn = { simplex: simplex3, perlin: perlin3 };
+
+const Waves = ({ groups, rotateMode, ...props }) => {
     const mesh = useRef();
     const groupObjects = map(
         group => fromPairs(map(({ name, value }) => [name, value], group)),
@@ -11,7 +14,7 @@ const Waves = ({ groups, noisefn, rotateMode, ...props }) => {
     useFrame(state => {
         const time = state.clock.getElapsedTime();
 
-        // on mouse down release the kraken
+        // release the kraken on mouse down
         if (rotateMode) {
             mesh.current.rotation.x = Math.sin(time / 4);
             mesh.current.rotation.y = Math.sin(time / 2);
@@ -22,8 +25,8 @@ const Waves = ({ groups, noisefn, rotateMode, ...props }) => {
         for (var i = 0; i < mesh.current.geometry.vertices.length; i++) {
             const { x, y } = mesh.current.geometry.vertices[i];
             const groupValues = map(
-                ({ coefficient, magnitude, speed, move }) =>
-                    noisefn(
+                ({ coefficient, magnitude, speed, move, method }) =>
+                    getNoiseFn[method](
                         x * coefficient,
                         y * coefficient + time * move,
                         time * speed

@@ -1,10 +1,16 @@
 import { remove, append, last, findIndex, propEq, adjust, assoc } from 'ramda';
 
 const defaultGroup = [
-    { name: 'coefficient', value: 0.01, step: 0.01 },
-    { name: 'magnitude', value: 25, step: 1 },
-    { name: 'speed', value: 1, step: 1 },
-    { name: 'move', value: -1, step: 1 }
+    { name: 'coefficient', value: 0.01, step: 0.01, type: 'number' },
+    { name: 'magnitude', value: 25, step: 1, type: 'number' },
+    { name: 'speed', value: 1, step: 1, type: 'number' },
+    { name: 'move', value: -1, step: 1, type: 'number' },
+    {
+        name: 'method',
+        value: 'simplex',
+        type: 'choice',
+        options: ['simplex', 'perlin']
+    }
 ];
 export const initial = [defaultGroup];
 

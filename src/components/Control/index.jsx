@@ -1,4 +1,5 @@
 import React from 'react';
+import { map } from 'ramda';
 
 const NumberControlGroup = ({ name, value, setValue, step }) => (
     <div className="control-group">
@@ -13,18 +14,45 @@ const NumberControlGroup = ({ name, value, setValue, step }) => (
     </div>
 );
 
+const ChoiceControlGroup = ({ name, value, options, setValue }) => (
+    <div className="control-group">
+        <label htmlFor={name}>{name}</label>
+        <select
+            name={name}
+            id={name}
+            value={value}
+            onChange={event => setValue(event.target.value)}
+        >
+            {map(
+                val => (
+                    <option value={val}>{val}</option>
+                ),
+                options
+            )}
+        </select>
+    </div>
+);
+
+const getControlComponent = {
+    number: NumberControlGroup,
+    choice: ChoiceControlGroup
+};
+
 const ControlGroup = ({ controls, setValue, onRemove }) => (
     <div className="control">
         <div className="remove-control" onClick={onRemove}>
             -
         </div>
-        {controls.map(control => (
-            <NumberControlGroup
-                key={control.name}
-                setValue={setValue(control.name)}
-                {...control}
-            />
-        ))}
+        {map(control => {
+            const Control = getControlComponent[control.type];
+            return (
+                <Control
+                    key={control.name}
+                    setValue={setValue(control.name)}
+                    {...control}
+                />
+            );
+        }, controls)}
     </div>
 );
 
