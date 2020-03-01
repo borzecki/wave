@@ -3,7 +3,12 @@ import { useFrame } from 'react-three-fiber';
 import { sum, map, fromPairs } from 'ramda';
 import { simplex3, perlin3 } from '../../perlin';
 
-const getNoiseFn = { simplex: simplex3, perlin: perlin3 };
+const droplets = (x, y, z) => {
+    const noise = perlin3(x, y, z);
+    return noise > 0 ? noise : 0;
+};
+
+const getNoiseFn = { simplex: simplex3, perlin: perlin3, droplets };
 
 const Waves = ({ groups, rotateMode, ...props }) => {
     const mesh = useRef();

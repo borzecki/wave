@@ -9,7 +9,7 @@ const defaultGroup = [
         name: 'method',
         value: 'simplex',
         type: 'choice',
-        options: ['simplex', 'perlin']
+        options: ['simplex', 'perlin', 'droplets']
     }
 ];
 export const initial = [defaultGroup];
