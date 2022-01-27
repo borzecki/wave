@@ -13,7 +13,7 @@
         "react-dom": "^16.13.1",
         "react-scripts": "3.4.1",
         "react-three-fiber": "^4.0.28",
-        "three": "^0.115.0",
+        "three": "^0.137.0",
         "threejs-meshline": "^2.0.10"
     },
     "scripts": {
